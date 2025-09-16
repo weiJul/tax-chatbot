@@ -1,0 +1,430 @@
+# RAG Tax System Configuration
+# Optimized for RTX 2080 Ti (11GB VRAM)
+
+# Model configurations
+models:
+  # Embedding model - compact and efficient
+  embedding:
+    name: "BAAI/bge-base-en-v1.5"
+    cache_dir: "./models/embeddings"
+    max_seq_length: 512
+    batch_size: 32
+    device: "cuda"
+    
+  # Language model - GPT-Neo-2.7B for better performance
+  llm:
+    name: "EleutherAI/gpt-neo-2.7B"
+    cache_dir: "./models/llm"
+    max_new_tokens: 200
+    temperature: 0.7
+    top_p: 0.95
+    device: "cuda"
+
+# Vector database settings
+vector_store:
+  type: "chromadb"
+  persist_directory: "./data/vector_db"
+  collection_name: "tax_documents"
+  distance_metric: "cosine"
+
+# Document processing
+document_processing:
+  chunk_size: 512
+  chunk_overlap: 128
+  pdf_path: "./resources/information_material/BusinessTaxBasics_0.pdf"
+  processed_docs_path: "./data/processed"
+  
+  # Multi-document and jurisdiction settings
+  documents:
+    general_document:
+      path: "./resources/information_material/BusinessTaxBasics_0.pdf"
+      jurisdiction: "general"
+      description: "General business tax regulations"
+    california_document:
+      path: "./resources/information_material/pub29.pdf"
+      jurisdiction: "california"
+      description: "California-specific tax regulations"
+
+# RAG settings
+rag:
+  retrieval:
+    top_k: 5
+<<<<<<< HEAD
+    similarity_threshold: 0.4
+  generation:
+    max_context_length: 512
+    system_prompt: |
+      You are a helpful tax assistant specializing in Washington State business tax regulations. 
+      Use the provided context to answer questions accurately and cite relevant sections when possible.
+      If you cannot find the answer in the context, clearly state that you don't have that information.
+
+# Query router settings
+router:
+  classification:
+    confidence_threshold: 0.6  # Minimum confidence for routing decisions
+    fallback_to_general: true  # Fall back to general queries if user not found
+  
+  user_identification:
+    enable_pattern_matching: true  # Enable regex pattern matching as fallback
+    enable_llm_extraction: true    # Use LLM for user identifier extraction
+  
+  database:
+    path: "./resources/customers_data/customers.db"
+    connection_timeout: 30  # seconds
+    
+  personalization:
+    include_tax_bracket: true
+    include_filing_status: true  
+    include_state_info: true
+    max_context_enhancement: 200  # Max characters to add for context
+  
+  # Smart fallback system
+  fallback:
+    enable_smart_fallback: true  # Enable intelligent fallback to general RAG
+    confidence_threshold_for_fallback: 0.75  # Fall back if user_data confidence < 75%
+    log_fallback_decisions: true  # Log fallback events for analytics
+    show_fallback_message: true  # Show user when fallback occurs
+
+# LlamaIndex hierarchical retrieval settings
+llamaindex:
+  # Query engine settings
+  query_engines:
+    similarity_threshold: 0.4  # Minimum similarity for considering results
+    top_k_retrieval: 5  # Number of chunks to retrieve per query
+    enable_postprocessing: true  # Enable similarity postprocessing
+    
+  # Jurisdiction-specific settings
+  jurisdiction:
+    enable_auto_detection: true  # Automatically detect jurisdiction from queries
+    supported_jurisdictions: ["california", "general"]  # List of supported jurisdictions
+    fallback_to_general: true  # Fall back to general if jurisdiction-specific fails
+    california_keywords_threshold: 1  # Min keywords needed for CA detection
+    
+  # Filtering and retrieval strategy
+  retrieval_strategy:
+    hierarchy_levels: ["jurisdiction_specific", "general_fallback"]
+    max_fallback_attempts: 2
+    combine_results: false  # Whether to combine jurisdiction + general results
+    
+  # Performance settings
+  performance:
+    batch_size: 32  # Embedding batch size
+    cache_embeddings: true  # Cache query embeddings
+    parallel_queries: false  # Disable parallel querying for memory efficiency
+
+# Memory management
+memory:
+  max_gpu_memory_gb: 10  # Leave 1GB buffer on RTX 2080 Ti
+  clear_cache_interval: 5   # Clear GPU cache every 5 queries (more frequent due to larger model)
+  monitor_memory: true
+
+# Interface settings
+interfaces:
+  cli:
+    history_file: "./data/.chat_history"
+    max_history_entries: 100
+  web:
+    port: 8501
+    title: "Tax RAG Assistant"
+    
+# Model Context Protocol (MCP) settings - Pure MCP Implementation
+mcp:
+  # Server configuration
+  server:
+    script_path: "./mcp_tax_server.py"
+    transport: "stdio"  # stdio or http
+    timeout_seconds: 30
+    startup_wait: 2.0  # seconds to wait for server startup
+    
+  # Client configuration
+  client:
+    connection_retry_delay: 1.0  # seconds
+    max_connection_attempts: 3
+    connection_timeout: 10.0  # seconds
+    enable_pure_mcp_only: true  # No fallback mechanisms
+    
+  # Error handling
+  error_handling:
+    return_empty_on_failure: true  # Return empty results when MCP fails
+    log_mcp_errors: true
+    fail_gracefully: true
+    
+  # Resources configuration
+  resources:
+    user_profile_template: "user://profile/{user_id}"
+    tax_context_template: "user://tax-context/{user_id}"
+    cache_resources: false  # Disable caching for real-time data
+    
+  # Tools configuration
+  tools:
+    search_timeout: 10.0  # seconds
+    enable_fuzzy_search: true
+    max_search_results: 10
+    return_json_format: true  # Ensure JSON responses from tools
+
+# Phoenix-Arize AI observability and monitoring
+phoenix:
+  # Server configuration
+  server:
+    host: "localhost"
+    port: 6006
+    grpc_port: 6007  # Separate gRPC port to avoid conflicts
+    launch_app: true
+    notebook: false
+    
+  # Tracing configuration  
+  tracing:
+    enabled: true
+    project_name: "tax-rag-system"
+    endpoint: "http://localhost:6006/v1/traces"
+    batch_export_timeout: 30000
+    service_name: "tax-rag-assistant"
+    service_version: "1.0.0"
+    
+  # Evaluation configuration
+  evaluation:
+    enabled: true
+    auto_eval_interval: 10  # Run evaluations every 10 queries
+    tax_accuracy_threshold: 0.85
+    hallucination_threshold: 0.1
+    jurisdiction_accuracy_threshold: 0.90
+    citation_accuracy_threshold: 0.80
+    
+    # Evaluation datasets
+    datasets:
+      tax_accuracy_dataset: "./src/evaluation/datasets/tax_accuracy.json"
+      hallucination_dataset: "./src/evaluation/datasets/hallucination_prompts.json"
+      jurisdiction_dataset: "./src/evaluation/datasets/jurisdiction_tests.json"
+    
+    # Evaluation schedule
+    schedule:
+      daily_comprehensive: "02:00"  # Daily full evaluation at 2 AM
+      hourly_quick_check: "every_hour"  # Quick accuracy checks
+      real_time_sampling: 0.1  # Evaluate 10% of queries in real-time
+    
+  # Dashboard configuration
+  dashboard:
+    refresh_interval: 5  # seconds
+    retention_days: 30
+    enable_real_time_alerts: true
+    custom_views:
+      - name: "RAG Pipeline Performance"
+        metrics: ["retrieval_duration_ms", "generation_duration_ms", "pipeline_success_rate"]
+      - name: "Tax Accuracy Metrics"
+        metrics: ["tax_accuracy_score", "jurisdiction_accuracy", "citation_accuracy"]
+      - name: "User Experience"
+        metrics: ["query_classification_accuracy", "user_lookup_success_rate"]
+      - name: "System Health"
+        metrics: ["memory_gpu_usage", "embedding_batch_size", "retrieval_cache_hit_rate"]
+    
+  # Alerting configuration
+  alerts:
+    enabled: true
+    channels:
+      console: true
+      log_file: true
+      # email: false  # Uncomment and configure for production
+      # slack: false  # Uncomment and configure for production
+    
+    rules:
+      accuracy_drop:
+        metric: "tax_accuracy_score"
+        threshold: 0.80
+        comparison: "below"
+        severity: "high"
+      high_hallucination:
+        metric: "hallucination_rate"
+        threshold: 0.15
+        comparison: "above"
+        severity: "critical"
+      jurisdiction_misclassification:
+        metric: "jurisdiction_accuracy"
+        threshold: 0.90
+        comparison: "below"
+        severity: "medium"
+      gpu_memory_warning:
+        metric: "gpu_memory_used_mb"
+        threshold: 9000  # 9GB threshold for RTX 2080 Ti
+        comparison: "above"
+        severity: "medium"
+      response_latency:
+        metric: "pipeline_duration_ms"
+        threshold: 5000  # 5 seconds
+        comparison: "above"
+        severity: "low"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "./data/rag_system.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Phoenix-specific logging (configured in phoenix.evaluation section above)
+  phoenix:
+    file: "./data/phoenix_monitoring.log"
+=======
+    score_threshold: 0.7
+  
+  generation:
+    max_tokens: 200
+    temperature: 0.1
+    use_context: true
+
+# System settings
+system:
+  # GPU memory management
+  memory:
+    max_gpu_memory_gb: 10.0  # Leave 1GB buffer for RTX 2080 Ti
+    clear_cache_interval: 10  # Clear cache every N queries
+    
+  # Logging
+  logging:
+    level: "INFO"
+    file: "./logs/system.log"
+
+# LangChain configuration for query routing and chaining  
+langchain:
+  llm:
+    model_name: "EleutherAI/gpt-neo-2.7B"
+    max_tokens: 100
+    temperature: 0.1
+    cache: true
+
+# Query Router Configuration
+router:
+  classification:
+    confidence_threshold: 0.6
+    fallback_to_general: true
+  
+  user_identification:
+    enable_pattern_matching: true
+    enable_llm_extraction: true
+  
+  database:
+    path: "./resources/customers_data/customers.db"
+    connection_timeout: 30
+  
+  personalization:
+    include_tax_bracket: true
+    include_filing_status: true
+    include_income_info: true
+
+# MCP (Model Context Protocol) Configuration
+mcp:
+  server:
+    script_path: "./mcp_tax_server.py"
+    transport: "stdio"
+    timeout_seconds: 30
+    startup_wait: 2.0
+  
+  client:
+    connection_retry_delay: 1.0
+    max_connection_attempts: 3
+    connection_timeout: 10.0
+    enable_pure_mcp_only: true
+  
+  error_handling:
+    log_errors: true
+    return_empty_on_error: true
+    max_retry_attempts: 2
+
+# LlamaIndex Configuration for hierarchical retrieval
+llamaindex:
+  # Jurisdiction-specific retrieval settings
+  jurisdictions:
+    california:
+      keywords: ["california", "ca", "ftb", "franchise tax board", "pub29", 
+                "california residents", "ca state tax", "property tax rates"]
+      confidence_threshold: 0.3
+    
+    general:
+      fallback: true
+      default_jurisdiction: true
+  
+  # Retrieval settings
+  retrieval:
+    strategy: "hierarchical"  # hierarchical, simple, or hybrid
+    max_retrieved_documents: 10
+    similarity_threshold: 0.6
+    enable_fallback: true
+    
+  # Query engine settings  
+  query_engine:
+    similarity_top_k: 5
+    streaming: false
+    response_mode: "compact"
+
+# Embedding Configuration
+embedding:
+  model_name: "BAAI/bge-base-en-v1.5"
+  device: "cuda"
+  max_seq_length: 512
+  batch_size: 32
+  cache_embeddings: true
+  cache_dir: "./models/embeddings"
+
+# LLM Configuration
+llm:
+  model_name: "EleutherAI/gpt-neo-2.7B"
+  device: "cuda"
+  torch_dtype: "float16"  # Memory optimization
+  cache_dir: "./models/llm"
+  max_new_tokens: 200
+  temperature: 0.1
+  do_sample: true
+  pad_token_id: 50256
+
+# Phoenix-Arize AI Monitoring Configuration
+phoenix:
+  # Phoenix server settings
+  server:
+    host: "localhost"
+    port: 6006
+    auto_start: false
+    
+  # Tracing settings
+  tracing:
+    enabled: true
+    project_name: "tax-rag-system"
+    
+    # Trace different components
+    trace_llm_calls: true
+    trace_retrieval: true
+    trace_router: true
+    trace_embeddings: true
+    
+  # Evaluation settings
+  evaluation:
+    enabled: true
+    batch_size: 10
+    
+    # Evaluation criteria
+    criteria:
+      - "accuracy"
+      - "hallucination"
+      - "context_relevance"
+      - "jurisdiction_correctness"
+
+# Evaluation Configuration
+evaluation:
+  # Automated evaluation settings
+  automated:
+    enabled: true
+    schedule_interval_hours: 24
+    
+    # Test datasets
+    datasets:
+      tax_accuracy: "./src/evaluation/datasets/tax_accuracy.json"
+      jurisdiction_tests: "./src/evaluation/datasets/jurisdiction_tests.json"
+      hallucination_prompts: "./src/evaluation/datasets/hallucination_prompts.json"
+    
+    # Evaluation criteria
+    criteria:
+      accuracy_threshold: 0.8
+      hallucination_threshold: 0.1
+      jurisdiction_accuracy_threshold: 0.95
+      
+    # Reporting
+    report_path: "./evaluation_reports"
+    enable_slack_notifications: false
+>>>>>>> 2de4445af5b0450cbbc3b19f53906e102b965769

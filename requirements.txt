@@ -1,0 +1,71 @@
+# RAG Tax System Dependencies
+# Core ML/AI libraries optimized for RTX 2080 Ti (CUDA 11.8)
+
+# PyTorch with CUDA support
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Transformers and embeddings
+transformers>=4.35.0
+sentence-transformers>=2.2.2
+accelerate>=0.24.0
+
+# Vector database and embeddings (LlamaIndex wrapper over ChromaDB + BGE embeddings)
+# LlamaIndex for advanced retrieval with ChromaDB backend
+llama-index>=0.9.0
+llama-index-vector-stores-chroma>=0.1.0
+llama-index-embeddings-huggingface>=0.1.0
+
+# Vector database
+chromadb>=0.4.15
+
+# Document processing
+pypdf>=3.17.0
+python-docx>=0.8.11
+
+# Web interface
+streamlit>=1.28.0
+gradio>=3.50.0
+
+# Configuration and utilities
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+click>=8.1.7
+
+# Data processing
+numpy>=1.24.0
+pandas>=2.0.0
+tiktoken>=0.5.0
+
+# GPU monitoring and optimization
+gpustat>=1.1.0
+psutil>=5.9.0
+
+# LangChain for query routing and chaining
+langchain>=0.1.0
+langchain-community>=0.1.0
+langchain-core>=0.1.0
+
+# Model Context Protocol (MCP) for standardized AI tool integration
+mcp[cli]>=0.1.0
+
+# Phoenix-Arize AI observability and monitoring
+arize-phoenix>=4.0.0
+opentelemetry-api>=1.20.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-instrumentation>=0.41b0
+opentelemetry-exporter-otlp>=1.20.0
+
+# Evaluation and testing frameworks
+schedule>=1.2.0
+
+# Development tools
+pytest>=7.4.0
+black>=23.0.0
+<<<<<<< HEAD
+isort>=5.12.0
+
+=======
+isort>=5.12.0
+>>>>>>> 2de4445af5b0450cbbc3b19f53906e102b965769
