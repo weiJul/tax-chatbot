@@ -49,7 +49,6 @@ document_processing:
 rag:
   retrieval:
     top_k: 5
-<<<<<<< HEAD
     similarity_threshold: 0.4
   generation:
     max_context_length: 512
@@ -262,20 +261,6 @@ logging:
   # Phoenix-specific logging (configured in phoenix.evaluation section above)
   phoenix:
     file: "./data/phoenix_monitoring.log"
-=======
-    score_threshold: 0.7
-  
-  generation:
-    max_tokens: 200
-    temperature: 0.1
-    use_context: true
-
-# System settings
-system:
-  # GPU memory management
-  memory:
-    max_gpu_memory_gb: 10.0  # Leave 1GB buffer for RTX 2080 Ti
-    clear_cache_interval: 10  # Clear cache every N queries
     
   # Logging
   logging:
@@ -427,4 +412,3 @@ evaluation:
     # Reporting
     report_path: "./evaluation_reports"
     enable_slack_notifications: false
->>>>>>> 2de4445af5b0450cbbc3b19f53906e102b965769

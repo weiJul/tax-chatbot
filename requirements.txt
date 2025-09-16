@@ -63,9 +63,4 @@ schedule>=1.2.0
 # Development tools
 pytest>=7.4.0
 black>=23.0.0
-<<<<<<< HEAD
 isort>=5.12.0
-
-=======
-isort>=5.12.0
->>>>>>> 2de4445af5b0450cbbc3b19f53906e102b965769

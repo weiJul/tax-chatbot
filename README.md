@@ -69,7 +69,7 @@ python src/interfaces/cli_chat.py
 ```bash
 streamlit run src/interfaces/web_interface.py
 ```
-
+![](phoenix_sneek.png)
 ### MCP Server (For External Clients)
 ```bash
 python mcp_tax_server.py
