@@ -126,21 +126,3 @@ python test_hierarchical_retrieval.py
 python -c "from src.utils.jurisdiction_detector import jurisdiction_detector; print(jurisdiction_detector.detect_jurisdiction('California tax rates'))"
 ```
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 Links
-
-- [Architecture Documentation](ARCHITECTURE.md)
-- [API Documentation](API_DOCUMENTATION.md)
-- [Deployment Guide](DEPLOYMENT_GUIDE.md)
-- [Evaluation Guide](EVALUATION_GUIDE.md)
-
----
-
-**🎉 Production-Ready Tax Assistant** - Complete with AI monitoring, intelligent routing, and jurisdiction-aware responses!
